@@ -37,13 +37,22 @@ connection.connect((err) => {
   console.log('Conectado com sucesso! ID: ' + connection.threadId);
 });
 
+
+
 // Serve arquivos estáticos da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+
 // Rota para servir a página de login
 app.get('/', (req, res) => {
+
   res.sendFile(path.join(__dirname, 'public/login.html'));
+
+  
 });
+
+
 
 // Rota para registrar os usuários
 app.post('/subscription', (req, res) => {
@@ -185,6 +194,31 @@ app.post('/change-password', (req, res) => {
 // Adicione isso ao seu código existente do Node.js
 
 // Rota para adicionar um item ao carrinho
+app.post('/adicionar-carrinho', (req, res) => {
+  const { produtoId, quantidade } = req.body;
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res.status(401).json({ message: 'Usuário não autenticado.' });
+    
+
+    
+      
+    
+  }
+
+  const query = 'INSERT INTO carrinho (user_id, produto_id, quantidade) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantidade = quantidade + ?';
+  
+  connection.query(query, [userId, produtoId, quantidade, quantidade], (error) => {
+    if (error) {
+      console.error('Erro ao adicionar ao carrinho:', error);
+      return res.status(500).json({ message: 'Erro ao adicionar ao carrinho.' });
+    }
+
+    res.json({ message: 'Item adicionado ao carrinho com sucesso!' });
+  });
+});
+
 // Rota para obter os itens do carrinho
 app.get('/carrinho', (req, res) => {
   const userId = req.session.userId; // Assumindo que você está usando sessões
