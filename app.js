@@ -47,7 +47,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Rota para servir a página de login
 app.get('/', (req, res) => {
 
-  res.sendFile(path.join(__dirname, 'public/login.html'));
+  res.sendFile(path.join(__dirname, 'public/produtos.html'));
 
   
 });
@@ -202,11 +202,9 @@ app.post('/adicionar-carrinho', (req, res) => {
     return res.status(401).json({ message: 'Usuário não autenticado.' });
     
 
-    
-      
-    
   }
 
+  
   const query = 'INSERT INTO carrinho (user_id, produto_id, quantidade) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantidade = quantidade + ?';
   
   connection.query(query, [userId, produtoId, quantidade, quantidade], (error) => {
