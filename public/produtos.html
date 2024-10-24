@@ -83,27 +83,36 @@
         <a href="carrinho.html">Go to Cart</a>
     </div>
 
-    <script>
-        async function adicionarItemCarrinho(produtoId, quantidade) {
-            try {
-                const response = await fetch('/adicionar-carrinho', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ produtoId, quantidade })
-                });
-
-                const result = await response.json();
-                alert(result.message); // Exibe a mensagem de sucesso ou erro
-
-            } catch (error) {
-                console.error('Erro ao adicionar o item ao carrinho:', error);
+  
+        <script>
+            async function adicionarItemCarrinho(produtoId, quantidade) {
+                try {
+                    const response = await fetch('/adicionar-carrinho', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ produtoId, quantidade })
+                    });
+        
+                    if (response.status === 401) {
+                        // Usuário não autenticado, exibe o pop-up
+                        if (confirm('Você precisa estar logado para adicionar itens ao carrinho. Deseja fazer login agora?')) {
+                            window.location.href = '/login.html'; // Redireciona para a página de login
+                        }
+                    } else {
+                        const result = await response.json();
+                        alert(result.message); // Exibe a mensagem de sucesso ou erro
+                    }
+        
+                } catch (error) {
+                    console.error('Erro ao adicionar o item ao carrinho:', error);
+                }
             }
-        }
+        </script>
+        
 
         
-    </script>
 
 </body>
 </html>
