@@ -4,23 +4,23 @@ const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const axios = require('axios'); // Adicionar axios para fazer requisições HTTP
+const axios = require('axios'); // Para requisições HTTP
 const app = express();
 const port = 3000;
 require('dotenv').config();
 
-// Configurar o body-parser
+// Configurações do body-parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Configurar o express-session
+// Configuração da sessão
 app.use(session({
-  secret: 'your-secret-key', // Substitua por uma chave secreta segura
+  secret: 'your-secret-key', // Altere para uma chave secreta forte
   resave: false,
   saveUninitialized: false
 }));
 
-
+// Configuração do banco de dados
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -28,84 +28,86 @@ const connection = mysql.createConnection({
   database: process.env.DB_NAME
 });
 
-
 connection.connect((err) => {
   if (err) {
-    console.log('Erro: ' + err.stack);
+    console.log('Erro ao conectar com o banco de dados: ' + err.stack);
     return;
   }
   console.log('Conectado com sucesso! ID: ' + connection.threadId);
 });
 
-
-
-// Serve arquivos estáticos da pasta 'public'
+// Servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-
-// Rota para servir a página de login
+// Rota principal (exemplo de página de produtos ou login)
 app.get('/', (req, res) => {
-
   res.sendFile(path.join(__dirname, 'public/produtos.html'));
-
-  
 });
 
+// Função para validar se o CEP pertence a Salvador
+function isCepSalvador(cep) {
+  const cepNumber = parseInt(cep);
+  return cepNumber >= 40000000 && cepNumber <= 42599999;
+}
 
-
-// Rota para registrar os usuários
+// Rota para registrar os usuários com a validação do CEP
 app.post('/subscription', (req, res) => {
-  const { nome, sobrenome, email, telefone, cpf, password } = req.body;
+  const { nome, sobrenome, email, telefone, cpf, password, cep, rua, bairro, cidade, estado, numero } = req.body;
+
+  if (!isCepSalvador(cep)) {
+    return res.status(400).send('O CEP informado não pertence ao estado permitido.');
+  }
 
   bcrypt.hash(password, 10, (err, hash) => {
-    if (err) throw err;
+    if (err) return res.status(500).send('Erro ao criptografar a senha.');
 
-    const query = `INSERT INTO users (nome, sobrenome, email, telefone, cpf, password)
-                   VALUES (?, ?, ?, ?, ?, ?)`;
+    const query = `INSERT INTO users (nome, sobrenome, email, telefone, cpf, password, cep, rua, bairro, cidade, estado, numero)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    connection.query(query, [nome, sobrenome, email, telefone, cpf, hash], (error, results) => {
+    connection.query(query, [nome, sobrenome, email, telefone, cpf, hash, cep, rua, bairro, cidade, estado, numero], (error, results) => {
       if (error) {
         if (error.code === 'ER_DUP_ENTRY') {
-          res.send('Email ou CPF já cadastrado.');
+          return res.status(409).send('Email ou CPF já cadastrado.');
         } else {
-          throw error;
+          console.error('Erro ao registrar o usuário: ', error);
+          return res.status(500).send('Erro ao registrar o usuário.');
         }
-      } else {
-        res.redirect('/login'); // Certifique-se que essa página existe
       }
+      res.redirect('/login');
     });
   });
 });
 
-// Rota para autenticar os usuários (Login)
+// Rota para login de usuário
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  const query = 'SELECT id, email, password FROM users WHERE email = ?';
+  // Consulta para buscar o usuário pelo email
+  const query = 'SELECT id, password FROM users WHERE email = ?';
   connection.query(query, [email], (error, results) => {
     if (error) {
-      console.error('Erro ao buscar o usuário: ', error);
+      console.error('Erro ao buscar o usuário:', error);
       return res.status(500).send('Erro ao buscar o usuário.');
     }
 
+    // Verifica se o usuário foi encontrado
     if (results.length === 0) {
       return res.status(404).send('Usuário não encontrado.');
     }
 
     const user = results[0];
 
+    // Compara a senha informada com a senha armazenada no banco de dados
     bcrypt.compare(password, user.password, (err, isMatch) => {
       if (err) {
-        console.error('Erro ao comparar as senhas: ', err);
+        console.error('Erro ao comparar as senhas:', err);
         return res.status(500).send('Erro ao comparar as senhas.');
       }
 
+      // Se a senha for válida, inicia a sessão
       if (isMatch) {
-        req.session.userId = user.id;
-        req.session.userEmail = user.email;
-        // Redireciona para a página de produtos
-        return res.redirect('/produtos.html');
+        req.session.userId = user.id; // Armazena o ID do usuário na sessão
+        res.redirect('/produtos'); // Redireciona para a página de produtos (ou outra página protegida)
       } else {
         res.status(401).send('Senha incorreta.');
       }
@@ -113,36 +115,16 @@ app.post('/login', (req, res) => {
   });
 });
 
-
-// Função para validar se o CEP pertence a Salvador
-function isCepSalvador(cep) {
-  const cepNumber = parseInt(cep.replace('-', '')); // Remove o hífen do CEP e converte para número
-  return cepNumber >= 40000000 && cepNumber <= 42599999;
-}
-
-// Rota para buscar o endereço pelo CEP
-app.get('/buscar-endereco/:cep', async (req, res) => {
-  const { cep } = req.params;
-
-  if (!isCepSalvador(cep)) {
-    return res.status(400).json({ error: 'CEP não pertence a Salvador.' });
-  }
-
-  try {
-    // Usando a API ViaCEP para buscar o endereço
-    const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
-    const data = response.data;
-
-    if (data.erro) {
-      return res.status(404).json({ error: 'CEP não encontrado.' });
+// Rota para logout de usuário
+app.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send('Erro ao encerrar a sessão.');
     }
-
-    res.json(data); // Retorna os dados do endereço
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao buscar o endereço.' });
-  }
+    res.redirect(''); // Redireciona para a página inicial após logout
+  });
 });
+
 
 // Rota para trocar a senha
 app.post('/change-password', (req, res) => {
@@ -178,7 +160,7 @@ app.post('/change-password', (req, res) => {
         }
 
         const updateQuery = 'UPDATE users SET password = ? WHERE id = ?';
-        connection.query(updateQuery, [hash, user.id], (error, results) => {
+        connection.query(updateQuery, [hash, user.id], (error) => {
           if (error) {
             console.error('Erro ao atualizar a senha: ', error);
             return res.status(500).send('Erro ao atualizar a senha.');
@@ -191,7 +173,15 @@ app.post('/change-password', (req, res) => {
   });
 });
 
-// Adicione isso ao seu código existente do Node.js
+// Rota para servir a página de produtos após o login
+app.get('/produtos', (req, res) => {
+  if (!req.session.userId) {
+    // Redireciona para a página de login se o usuário não estiver autenticado
+    return res.redirect('/');
+  }
+  res.sendFile(path.join(__dirname, 'public/produtos.html'));
+});
+
 
 // Rota para adicionar um item ao carrinho
 app.post('/adicionar-carrinho', (req, res) => {
@@ -200,13 +190,9 @@ app.post('/adicionar-carrinho', (req, res) => {
 
   if (!userId) {
     return res.status(401).json({ message: 'Usuário não autenticado.' });
-    
-
   }
 
-  
   const query = 'INSERT INTO carrinho (user_id, produto_id, quantidade) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantidade = quantidade + ?';
-  
   connection.query(query, [userId, produtoId, quantidade, quantidade], (error) => {
     if (error) {
       console.error('Erro ao adicionar ao carrinho:', error);
@@ -215,36 +201,47 @@ app.post('/adicionar-carrinho', (req, res) => {
 
     res.json({ message: 'Item adicionado ao carrinho com sucesso!' });
   });
+
 });
 
-// Rota para obter os itens do carrinho
+//carrinho
 app.get('/carrinho', (req, res) => {
-  const userId = req.session.userId; // Assumindo que você está usando sessões
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.status(401).json({ message: 'Usuário não autenticado.' });
+  }
 
-  const query = 'SELECT c.quantidade, p.nome, p.id AS produto_id FROM carrinho c JOIN produtos p ON c.produto_id = p.id WHERE c.user_id = ?';
+  const query = `
+    SELECT c.produto_id, p.nome, c.quantidade
+    FROM carrinho c
+    JOIN produtos p ON c.produto_id = p.id
+    WHERE c.user_id = ?
+  `;
   connection.query(query, [userId], (error, results) => {
-      if (error) {
-          console.error('Erro ao buscar o carrinho:', error);
-          return res.status(500).json({ message: 'Erro ao buscar o carrinho.' });
-      }
-
-      res.json(results);
+    if (error) {
+      console.error('Erro ao buscar itens do carrinho:', error);
+      return res.status(500).json({ message: 'Erro ao buscar o carrinho.' });
+    }
+    res.json(results);
   });
 });
 
-// Rota para atualizar a quantidade do item no carrinho
+// Rota para atualizar a quantidade de um item no carrinho
 app.post('/atualizar-carrinho', (req, res) => {
   const { produtoId, quantidade } = req.body;
   const userId = req.session.userId;
 
+  if (!userId) {
+    return res.status(401).json({ message: 'Usuário não autenticado.' });
+  }
+
   const query = 'UPDATE carrinho SET quantidade = ? WHERE user_id = ? AND produto_id = ?';
   connection.query(query, [quantidade, userId, produtoId], (error) => {
-      if (error) {
-          console.error('Erro ao atualizar a quantidade:', error);
-          return res.status(500).json({ message: 'Erro ao atualizar a quantidade.' });
-      }
-
-      res.json({ message: 'Quantidade atualizada com sucesso!' });
+    if (error) {
+      console.error('Erro ao atualizar quantidade no carrinho:', error);
+      return res.status(500).json({ message: 'Erro ao atualizar quantidade.' });
+    }
+    res.json({ message: 'Quantidade atualizada com sucesso!' });
   });
 });
 
@@ -253,23 +250,24 @@ app.delete('/remover-carrinho', (req, res) => {
   const { produtoId } = req.body;
   const userId = req.session.userId;
 
+  if (!userId) {
+    return res.status(401).json({ message: 'Usuário não autenticado.' });
+  }
+
   const query = 'DELETE FROM carrinho WHERE user_id = ? AND produto_id = ?';
   connection.query(query, [userId, produtoId], (error) => {
-      if (error) {
-          console.error('Erro ao remover item do carrinho:', error);
-          return res.status(500).json({ message: 'Erro ao remover item do carrinho.' });
-      }
-
-      res.json({ message: 'Item removido com sucesso!' });
+    if (error) {
+      console.error('Erro ao remover item do carrinho:', error);
+      return res.status(500).json({ message: 'Erro ao remover item.' });
+    }
+    res.json({ message: 'Item removido com sucesso!' });
   });
 });
 
 
 
 
-
-
-// Inicializar o servidor
+// Inicialização do servidor
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}/`);
 });
