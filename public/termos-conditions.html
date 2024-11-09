@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termos e Condições</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .terms-container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow-y: auto;
+            height: 400px;
+            white-space: pre-line; /* Mantém quebras de linha e espaços no texto */
+        }
+
+        .accept-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .accept-container input {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Termos e Condições</h1>
+
+    <!-- Área de visualização dos Termos e Condições -->
+    <div class="terms-container">
+        <p>
+ML DECORAÇÃO E EVENTOS<br>
+Contato: 99142-3152 / 98755-7081 (zap) -Luciana<br>
+EMAIL: mldecoracao@hotmail.com<br>
+Instagram: @ml_decoracao<br><br>
+
+CONTRATO DE PRESTAÇÕES DE SERVIÇOS DE DECORAÇÃO DE BUFFET<br><br>
+
+Pelo presente instrumento, ML DECORAÇÃO representado por Luciana Mota Passos, residente no endereço Rua do Teskey n 102 E Alto da Teresinha, CNPJ 46.651.299/0001-45 como CONTRATADA. Salvador Ba Como CONTRATANTE e firma o presente contrato para prestação de serviços.<br><br>
+
+<b>Cláusula I</b> - O objetivo deste contrato é a prestação de Locação de material anexa neste contrato parte integrante inseparável deste contrato, conforme o combinado, entre o CONTRATADA e o CONTRATANTE para Locação de material para o aniversário. Que se realizará em //2024 às  hs  no endereço da CONTRATANTE tendo seu valor Total de R$,00 (. reais) pagamento de 100% mediante este contrato.<br><br>
+
+<b>Cláusula II</b> - Em caso de desistência por da CONTRATANTE ou da CONTRATADA, este pagará uma multa de 50% (cinquenta por cento) sob o valor do contrato.<br><br>
+
+<b>Cláusula III</b> - Em caso de desistência por parte do CONTRATANTE, além de pagar a multa de 50% (cinquenta por cento) sob o valor do contrato, a qual será abatida do valor efetivamente pago, além de outras despesas comprovadas que já tinham sido efetuadas pela CONTRATADA. O valor pago não será devolvido e ficará como crédito para futuras locações.<br><br>
+
+<b>Cláusula IV</b> - Todo material danificado durante o evento será de inteira responsabilidade do CONTRATANTE, tendo o mesmo que efetuar a devida reposição dentro de 48h.<br><br>
+
+<b>Cláusula V</b> - Fica estipulado que qualquer alteração no orçamento após o fechamento deste contrato resultará também em alteração de cláusula do mesmo, acrescentando dessa forma o valor correspondente aos itens excedentes.<br><br>
+
+E por estarem justas, cientes e de acordo com todas as cláusulas e condições do presente contrato, as partes por si assinam este documento em duas vias para um só feito, na presença das testemunhas abaixo.
+        </p>
+    </div>
+
+    <!-- Seção de aceitação -->
+    <div class="accept-container">
+        <input type="checkbox" id="accept-terms">
+        <label for="accept-terms">Eu li e aceito os Termos e Condições</label>
+        <br><br>
+        <button onclick="confirmAcceptance()" disabled id="accept-button">Continuar</button>
+    </div>
+
+    <script>
+        const checkbox = document.getElementById('accept-terms');
+        const button = document.getElementById('accept-button');
+
+        // Ativa o botão se o checkbox for marcado
+        checkbox.addEventListener('change', () => {
+            button.disabled = !checkbox.checked;
+        });
+
+        // Função para confirmar a aceitação
+        function confirmAcceptance() {
+            if (checkbox.checked) {
+                alert("Termos e Condições aceitos!");
+                // Redirecionar ou realizar outra ação, por exemplo:
+                // window.location.href = "/next-page";
+            }
+        }
+    </script>
+</body>
+</html>
