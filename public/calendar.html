@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendário Interativo</title>
     <style>
-        /* Estilos simples para a página */
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -72,15 +71,36 @@
         #month-display {
             font-size: 20px;
         }
+
+        .rental-dates {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+
+        .rental-dates div {
+            margin: 5px 0;
+        }
+
+        .terms-button {
+            margin-top: 20px;
+        }
+
+        .terms-button button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+        }
     </style>
 </head>
 <body>
     <h1>Calendário Interativo</h1>
 
     <div class="month-nav">
-        <button onclick="changeMonth(-1)">&#9664;</button> <!-- Seta para retroceder -->
+        <button onclick="changeMonth(-1)">&#9664;</button>
         <span id="month-display"></span>
-        <button onclick="changeMonth(1)">&#9654;</button> <!-- Seta para avançar -->
+        <button onclick="changeMonth(1)">&#9654;</button>
     </div>
 
     <div id="calendar"></div>
@@ -91,17 +111,25 @@
         <div id="year-output">Ano: --</div>
     </div>
 
+    <div class="rental-dates">
+        <div id="pickup-date">Data de Retirada: --</div>
+        <div id="party-date">Data da Festa: --</div>
+        <div id="return-date">Data de Devolução: --</div>
+    </div>
+
+    <div class="terms-button">
+        <!-- Botão desativado até que uma data seja selecionada -->
+        <button id="terms-button" onclick="goToTerms()" disabled>Ver Termos e Condições</button>
+    </div>
+
     <script>
         let currentYear = new Date().getFullYear();
-        let currentMonth = new Date().getMonth(); // Mês atual (de 0 a 11)
+        let currentMonth = new Date().getMonth();
 
-        // Função para gerar o calendário
         function generateCalendar(year, month) {
             const calendarDiv = document.getElementById('calendar');
             const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            calendarDiv.innerHTML = ''; // Limpar o calendário anterior
-
-            // Atualizar o display do mês e ano
+            calendarDiv.innerHTML = '';
             document.getElementById('month-display').innerText = `${monthNames[month]} ${year}`;
 
             const date = new Date(year, month, 1);
@@ -111,12 +139,12 @@
             let emptyCells = date.getDay();
 
             for (let i = 0; i < emptyCells; i++) {
-                table += '<td></td>'; // Adicionar células vazias até o primeiro dia do mês
+                table += '<td></td>';
             }
 
             for (let day = 1; day <= daysInMonth; day++) {
                 if ((emptyCells + day - 1) % 7 === 0) {
-                    table += '</tr><tr>'; // Nova linha a cada 7 dias
+                    table += '</tr><tr>';
                 }
                 table += `<td onclick="selectDate(${day}, ${month}, ${year})">${day}</td>`;
             }
@@ -125,33 +153,53 @@
             calendarDiv.innerHTML = table;
         }
 
-        // Função para selecionar a data
         function selectDate(day, month, year) {
             document.getElementById('day-output').innerText = 'Dia: ' + day;
-            document.getElementById('month-output').innerText = 'Mês: ' + (month + 1); // Mês começa em 0
+            document.getElementById('month-output').innerText = 'Mês: ' + (month + 1);
             document.getElementById('year-output').innerText = 'Ano: ' + year;
+
+            const partyDate = new Date(year, month, day);
+            const pickupDate = new Date(partyDate);
+            const returnDate = new Date(partyDate);
+
+            pickupDate.setDate(partyDate.getDate() - 1);
+            returnDate.setDate(partyDate.getDate() + 1);
+
+            document.getElementById('pickup-date').innerText = 'Data de Retirada: ' + formatDate(pickupDate);
+            document.getElementById('party-date').innerText = 'Data da Festa: ' + formatDate(partyDate);
+            document.getElementById('return-date').innerText = 'Data de Devolução: ' + formatDate(returnDate);
+
+            // Ativar o botão de Termos e Condições após a seleção da data
+            document.getElementById('terms-button').disabled = false;
         }
 
-        // Função para mudar o mês
+        function formatDate(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
         function changeMonth(direction) {
             currentMonth += direction;
 
-            // Se passar de dezembro, vai para o ano seguinte
             if (currentMonth > 11) {
                 currentMonth = 0;
                 currentYear++;
             }
-            // Se passar de janeiro, volta para o ano anterior
             if (currentMonth < 0) {
                 currentMonth = 11;
                 currentYear--;
             }
 
-            // Gerar o novo calendário com o novo mês
             generateCalendar(currentYear, currentMonth);
         }
 
-        // Gerar o calendário para o mês atual
+        // Redireciona para a página de Termos e Condições
+        function goToTerms() {
+            window.location.href = 'termos-conditions.html'; // Altere para o caminho da página de Termos e Condições
+        }
+
         generateCalendar(currentYear, currentMonth);
     </script>
 </body>
