@@ -44,6 +44,94 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/produtos.html'));
 });
 
+
+// Função para validar CPF
+function validarCPF(cpf) {
+  cpf = cpf.replace(/[^\d]+/g, ''); // Remove caracteres não numéricos
+
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
+    return false; // CPF inválido ou com números repetidos
+  }
+
+  let soma = 0;
+  let resto;
+
+  // Primeiro dígito de verificação
+  for (let i = 0; i < 9; i++) {
+    soma += parseInt(cpf.charAt(i)) * (10 - i);
+  }
+  resto = soma % 11;
+  if (resto < 2) {
+    resto = 0;
+  } else {
+    resto = 11 - resto;
+  }
+  if (parseInt(cpf.charAt(9)) !== resto) {
+    return false;
+  }
+
+  soma = 0;
+  // Segundo dígito de verificação
+  for (let i = 0; i < 10; i++) {
+    soma += parseInt(cpf.charAt(i)) * (11 - i);
+  }
+  resto = soma % 11;
+  if (resto < 2) {
+    resto = 0;
+  } else {
+    resto = 11 - resto;
+  }
+  if (parseInt(cpf.charAt(10)) !== resto) {
+    return false;
+  }
+
+  return true;
+}
+
+// Função para validar CNPJ
+function validarCNPJ(cnpj) {
+  cnpj = cnpj.replace(/[^\d]+/g, ''); // Remove caracteres não numéricos
+
+  if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) {
+    return false; // CNPJ inválido ou com números repetidos
+  }
+
+  let soma = 0;
+  let resto;
+
+  // Validação do primeiro dígito
+  for (let i = 0; i < 12; i++) {
+    soma += parseInt(cnpj.charAt(i)) * (5 - (i % 8) + 1);
+  }
+  resto = soma % 11;
+  if (resto < 2) {
+    resto = 0;
+  } else {
+    resto = 11 - resto;
+  }
+  if (parseInt(cnpj.charAt(12)) !== resto) {
+    return false;
+  }
+
+  soma = 0;
+  // Validação do segundo dígito
+  for (let i = 0; i < 13; i++) {
+    soma += parseInt(cnpj.charAt(i)) * (6 - (i % 8) + 1);
+  }
+  resto = soma % 11;
+  if (resto < 2) {
+    resto = 0;
+  } else {
+    resto = 11 - resto;
+  }
+  if (parseInt(cnpj.charAt(13)) !== resto) {
+    return false;
+  }
+
+  return true;
+}
+
+
 // Função para validar se o CEP pertence a Salvador
 function isCepSalvador(cep) {
   const cepNumber = parseInt(cep);
@@ -51,8 +139,21 @@ function isCepSalvador(cep) {
 }
 
 // Rota para registrar os usuários com a validação do CEP
+
+// Rota para inscrição
+
 app.post('/subscription', (req, res) => {
-  const { nome, sobrenome, email, telefone, cpf, password, cep, rua, bairro, cidade, estado, numero } = req.body;
+  const { nome, sobrenome, email, telefone, cpf_cnpj, tipo_cliente, password, cep, rua, bairro, cidade, estado, numero } = req.body;
+
+  // Verificar se 'tipo_cliente' foi enviado corretamente
+  if (!tipo_cliente) {
+    return res.status(400).send('Tipo de cliente não selecionado.');
+  }
+
+  // Validar CPF ou CNPJ
+  if (!validarCPF(cpf_cnpj)) {
+    return res.status(400).send('CPF inválido.');
+  }
 
   if (!isCepSalvador(cep)) {
     return res.status(400).send('O CEP informado não pertence ao estado permitido.');
@@ -61,29 +162,30 @@ app.post('/subscription', (req, res) => {
   bcrypt.hash(password, 10, (err, hash) => {
     if (err) return res.status(500).send('Erro ao criptografar a senha.');
 
-    const query = `INSERT INTO users (nome, sobrenome, email, telefone, cpf, password, cep, rua, bairro, cidade, estado, numero)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const query = `
+      INSERT INTO users (nome, sobrenome, email, telefone, cpf_cnpj, tipo_cliente, password, cep, rua, bairro, cidade, estado, numero)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
-    connection.query(query, [nome, sobrenome, email, telefone, cpf, hash, cep, rua, bairro, cidade, estado, numero], (error, results) => {
+    connection.query(query, [nome, sobrenome, email, telefone, cpf_cnpj, tipo_cliente, hash, cep, rua, bairro, cidade, estado, numero], (error, results) => {
       if (error) {
-        if (error.code === 'ER_DUP_ENTRY') {
-          return res.status(409).send('Email ou CPF já cadastrado.');
-        } else {
-          console.error('Erro ao registrar o usuário: ', error);
-          return res.status(500).send('Erro ao registrar o usuário.');
-        }
+        console.error('Erro ao registrar o usuário: ', error);  // Mostrar detalhes do erro
+        return res.status(500).send(`Erro ao registrar o usuário: ${error.message}`);
+      }else{
+      console.log('Usuário registrado com sucesso:', results);  // Exibir resultados da inserção
+      res.sendFile(path.join(__dirname, 'public', 'login.html'));
       }
-      res.redirect('/login');
     });
   });
 });
+
 
 // Rota para login de usuário
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
   // Consulta para buscar o usuário pelo email
-  const query = 'SELECT id, password FROM users WHERE email = ?';
+  const query = 'SELECT id, password, tipo_cliente FROM users WHERE email = ?';
   connection.query(query, [email], (error, results) => {
     if (error) {
       console.error('Erro ao buscar o usuário:', error);
@@ -107,7 +209,8 @@ app.post('/login', (req, res) => {
       // Se a senha for válida, inicia a sessão
       if (isMatch) {
         req.session.userId = user.id; // Armazena o ID do usuário na sessão
-        res.redirect('/produtos'); // Redireciona para a página de produtos (ou outra página protegida)
+        req.session.tipoCliente = user.tipo_cliente; // Armazena o tipo de cliente na sessão
+        res.sendFile(path.join(__dirname, 'public', 'produtos.html')); // Redireciona para a página de produtos
       } else {
         res.status(401).send('Senha incorreta.');
       }
@@ -121,10 +224,9 @@ app.post('/logout', (req, res) => {
     if (err) {
       return res.status(500).send('Erro ao encerrar a sessão.');
     }
-    res.redirect(''); // Redireciona para a página inicial após logout
+    res.redirect('/login'); // Redireciona para a página de login após logout
   });
 });
-
 
 // Rota para trocar a senha
 app.post('/change-password', (req, res) => {
@@ -173,16 +275,6 @@ app.post('/change-password', (req, res) => {
   });
 });
 
-// Rota para servir a página de produtos após o login
-app.get('/produtos', (req, res) => {
-  if (!req.session.userId) {
-    // Redireciona para a página de login se o usuário não estiver autenticado
-    return res.redirect('/');
-  }
-  res.sendFile(path.join(__dirname, 'public/produtos.html'));
-});
-
-
 // Rota para adicionar um item ao carrinho
 app.post('/adicionar-carrinho', (req, res) => {
   const { produtoId, quantidade } = req.body;
@@ -204,7 +296,7 @@ app.post('/adicionar-carrinho', (req, res) => {
 
 });
 
-//carrinho
+// Rota para visualizar os itens no carrinho
 app.get('/carrinho', (req, res) => {
   const userId = req.session.userId;
   if (!userId) {
@@ -212,7 +304,7 @@ app.get('/carrinho', (req, res) => {
   }
 
   const query = `
-    SELECT c.produto_id, p.nome, c.quantidade
+    SELECT c.produto_id, p.nome, c.quantidade, p.preco 
     FROM carrinho c
     JOIN produtos p ON c.produto_id = p.id
     WHERE c.user_id = ?
@@ -264,6 +356,43 @@ app.delete('/remover-carrinho', (req, res) => {
   });
 });
 
+// Rota para reservar um item
+app.post('/reservar', (req, res) => {
+  const userId = req.session.userId;
+  const { produtoId, dataEvento } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({ message: 'Usuário não autenticado.' });
+  }
+
+  const dataEventoObj = new Date(dataEvento);
+  const dataRetirada = new Date(dataEventoObj);
+  dataRetirada.setDate(dataRetirada.getDate() - 1);
+  const dataDevolucao = new Date(dataEventoObj);
+  dataDevolucao.setDate(dataDevolucao.getDate() + 1);
+
+  const query = `
+    INSERT INTO reservas (user_id, produto_id, data_retirada, data_evento, data_devolucao)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+  connection.query(query, [userId, produtoId, dataRetirada, dataEvento, dataDevolucao], (error) => {
+    if (error) {
+      console.error('Erro ao salvar a reserva:', error);
+      return res.status(500).json({ message: 'Erro ao salvar a reserva.' });
+    }
+
+    // Enviar email de confirmação (exemplo com Nodemailer)
+    sendConfirmationEmail(userId, produtoId, dataRetirada, dataEvento, dataDevolucao);
+
+    res.json({ message: 'Reserva realizada com sucesso!' });
+  });
+});
+
+app.get('/calendario', (req, res) => {
+  const produtoId = req.query.produtoId; // Captura o parâmetro produtoId
+  console.log('Produto ID:', produtoId);  // Exemplo de como capturar e usar o valor
+  res.sendFile(path.join(__dirname, 'public', 'calendar.html'));
+});
 
 
 
