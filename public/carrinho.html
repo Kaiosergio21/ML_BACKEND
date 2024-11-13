@@ -29,6 +29,7 @@
                             <p>Quantidade: <input type="number" value="${produto.quantidade}" min="1" id="quantidade-${produto.produto_id}"></p>
                             <button onclick="atualizarQuantidade(${produto.produto_id})">Atualizar</button>
                             <button onclick="removerItem(${produto.produto_id})">Remover</button>
+                            <button onclick="redirecionarParaCalendario(${produto.produto_id})">Registrar Aluguel</button>
                         </div>
                     `;
                 });
@@ -80,6 +81,11 @@
                 console.error('Erro ao remover item do carrinho:', error);
             }
         }
+        async function redirecionarParaCalendario(produtoId) {
+            // Redireciona para a página do calendário, passando o produtoId como parâmetro na URL
+            window.location.href = `/calendario?produtoId=${produtoId}`;
+        }
+        
 
         // Carrega os itens do carrinho ao abrir a página
         carregarCarrinho();
