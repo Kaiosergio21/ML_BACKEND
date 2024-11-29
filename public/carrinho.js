@@ -115,7 +115,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #83851c;
             margin: 0;
             padding: 20px;
         }
@@ -123,18 +123,20 @@
         .container {
             max-width: 800px;
             margin: auto;
-            background: #fff;
+            background: #83851c;
+            
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.63);
         }
 
         .carrinho-list {
-            margin-top: 20px;
+            margin-top: 50px;
+            margin-bottom: 30px;
         }
 
         .carrinho-item {
-            border: 1px solid #ddd;
+            border: 1px solid #000000;
             border-radius: 5px;
             margin: 10px 0;
             padding: 10px;
@@ -148,15 +150,16 @@
         }
 
         button {
-            background: #28a745;
-            color: #fff;
+            background: #000000;
+            color: #83851c;
             border: none;
             padding: 10px;
             cursor: pointer;
         }
 
         button:hover {
-            background: #218838;
+            background: #83851c;
+            color: #000000;
         }
     </style>
 
