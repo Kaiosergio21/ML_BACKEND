@@ -37,54 +37,152 @@
     <!-- Área de visualização dos Termos e Condições -->
     <div class="terms-container">
         <p>
-ML DECORAÇÃO E EVENTOS<br>
-Contato: 99142-3152 / 98755-7081 (zap) -Luciana<br>
-EMAIL: mldecoracao@hotmail.com<br>
-Instagram: @ml_decoracao<br><br>
+            ML DECORAÇÃO E EVENTOS<br>
+            Contato: 99142-3152 / 98755-7081 (zap) -Luciana<br>
+            EMAIL: mldecoracao@hotmail.com<br>
+            Instagram: @ml_decoracao<br><br>
 
-CONTRATO DE PRESTAÇÕES DE SERVIÇOS DE DECORAÇÃO DE BUFFET<br><br>
+            CONTRATO DE PRESTAÇÕES DE SERVIÇOS DE DECORAÇÃO DE BUFFET<br><br>
 
-Pelo presente instrumento, ML DECORAÇÃO representado por Luciana Mota Passos, residente no endereço Rua do Teskey n 102 E Alto da Teresinha, CNPJ 46.651.299/0001-45 como CONTRATADA. Salvador Ba Como CONTRATANTE e firma o presente contrato para prestação de serviços.<br><br>
+            Pelo presente instrumento, ML DECORAÇÃO representado por Luciana Mota Passos, residente no endereço Rua do Teskey n 102 E Alto da Teresinha, CNPJ 46.651.299/0001-45 como CONTRATADA. Salvador Ba Como CONTRATANTE e firma o presente contrato para prestação de serviços.<br><br>
 
-<b>Cláusula I</b> - O objetivo deste contrato é a prestação de Locação de material anexa neste contrato parte integrante inseparável deste contrato, conforme o combinado, entre o CONTRATADA e o CONTRATANTE para Locação de material para o aniversário. Que se realizará em //2024 às  hs  no endereço da CONTRATANTE tendo seu valor Total de R$,00 (. reais) pagamento de 100% mediante este contrato.<br><br>
+            <b>Cláusula I</b> - O objetivo deste contrato é a prestação de Locação de material anexa neste contrato parte integrante inseparável deste contrato, conforme o combinado, entre o CONTRATADA e o CONTRATANTE para Locação de material para o aniversário. Que se realizará em //2024 às  hs  no endereço da CONTRATANTE tendo seu valor Total de R$,00 (. reais) pagamento de 100% mediante este contrato.<br><br>
 
-<b>Cláusula II</b> - Em caso de desistência por da CONTRATANTE ou da CONTRATADA, este pagará uma multa de 50% (cinquenta por cento) sob o valor do contrato.<br><br>
+            <b>Cláusula II</b> - Em caso de desistência por da CONTRATANTE ou da CONTRATADA, este pagará uma multa de 50% (cinquenta por cento) sob o valor do contrato.<br><br>
 
-<b>Cláusula III</b> - Em caso de desistência por parte do CONTRATANTE, além de pagar a multa de 50% (cinquenta por cento) sob o valor do contrato, a qual será abatida do valor efetivamente pago, além de outras despesas comprovadas que já tinham sido efetuadas pela CONTRATADA. O valor pago não será devolvido e ficará como crédito para futuras locações.<br><br>
+            <b>Cláusula III</b> - Em caso de desistência por parte do CONTRATANTE, além de pagar a multa de 50% (cinquenta por cento) sob o valor do contrato, a qual será abatida do valor efetivamente pago, além de outras despesas comprovadas que já tinham sido efetuadas pela CONTRATADA. O valor pago não será devolvido e ficará como crédito para futuras locações.<br><br>
 
-<b>Cláusula IV</b> - Todo material danificado durante o evento será de inteira responsabilidade do CONTRATANTE, tendo o mesmo que efetuar a devida reposição dentro de 48h.<br><br>
+            <b>Cláusula IV</b> - Todo material danificado durante o evento será de inteira responsabilidade do CONTRATANTE, tendo o mesmo que efetuar a devida reposição dentro de 48h.<br><br>
 
-<b>Cláusula V</b> - Fica estipulado que qualquer alteração no orçamento após o fechamento deste contrato resultará também em alteração de cláusula do mesmo, acrescentando dessa forma o valor correspondente aos itens excedentes.<br><br>
+            <b>Cláusula V</b> - Fica estipulado que qualquer alteração no orçamento após o fechamento deste contrato resultará também em alteração de cláusula do mesmo, acrescentando dessa forma o valor correspondente aos itens excedentes.<br><br>
 
-E por estarem justas, cientes e de acordo com todas as cláusulas e condições do presente contrato, as partes por si assinam este documento em duas vias para um só feito, na presença das testemunhas abaixo.
+            E por estarem justas, cientes e de acordo com todas as cláusulas e condições do presente contrato, as partes por si assinam este documento em duas vias para um só feito, na presença das testemunhas abaixo.
         </p>
     </div>
 
     <!-- Seção de aceitação -->
     <div class="accept-container">
-        <input type="checkbox" id="accept-terms">
+        <input type="checkbox" id="accept-terms" onclick="toggleButtonState()">
         <label for="accept-terms">Eu li e aceito os Termos e Condições</label>
         <br><br>
         <button onclick="confirmAcceptance()" disabled id="accept-button">Continuar</button>
     </div>
 
     <script>
-        const checkbox = document.getElementById('accept-terms');
-        const button = document.getElementById('accept-button');
+        // Habilita ou desabilita o botão "Continuar" dependendo se o usuário aceitou os termos
+        function toggleButtonState() {
+            const checkbox = document.getElementById('accept-terms');
+            const button = document.getElementById('accept-button');
+            button.disabled = !checkbox.checked; // Habilita o botão apenas quando aceito
+        }
 
-        // Ativa o botão se o checkbox for marcado
-        checkbox.addEventListener('change', () => {
-            button.disabled = !checkbox.checked;
-        });
-
-        // Função para confirmar a aceitação
         function confirmAcceptance() {
-            if (checkbox.checked) {
-                alert("Termos e Condições aceitos!");
-                // Redirecionar ou realizar outra ação, por exemplo:
-                // window.location.href = "/next-page";
+            const produtoId = localStorage.getItem('produtoId');
+            const quantidade = localStorage.getItem('quantidade');
+            const dataEvento = localStorage.getItem('data_evento');
+            const dataRetirada = localStorage.getItem('data_retirada');
+            const dataDevolucao = localStorage.getItem('data_devolucao');
+        
+            // Validação básica
+            if (!produtoId || !quantidade || !dataEvento || !dataRetirada || !dataDevolucao) {
+                alert('Faltam informações para concluir a reserva. Verifique o carrinho e o calendário.');
+                return;
+            }
+        
+            // Dados a serem enviados para o backend
+            const reservaData = {
+                produtoId,
+                quantidade,
+                data_evento: dataEvento,
+                data_retirada: dataRetirada,
+                data_devolucao: dataDevolucao,
+            };
+        
+            // Envia os dados para o backend
+            fetch('/confirmar-reserva', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reservaData),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        alert('Reserva confirmada com sucesso!');
+                        // Redireciona para a próxima página
+                        window.location.href = '/pagamento.html';
+                    } else {
+                        alert('Erro ao confirmar a reserva: ' + data.message);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Erro ao enviar dados:', error);
+                    alert('Erro ao confirmar a reserva. Tente novamente mais tarde.');
+                });
+        }
+        
+        async function realizarReserva() {
+            const produtoId = localStorage.getItem('produtoId');
+            const quantidadeInput = document.getElementById('quantidade');
+            const dataEventoInput = document.getElementById('dataEvento');
+            const dataRetiradaInput = document.getElementById('dataRetirada');
+            const dataDevolucaoInput = document.getElementById('dataDevolucao');
+        
+            if (!produtoId || !quantidadeInput || !dataEventoInput || !dataRetiradaInput || !dataDevolucaoInput) {
+                alert('Erro: Dados necessários estão ausentes.');
+                return;
+            }
+        
+            const quantidade = quantidadeInput.value;
+            const dataEvento = dataEventoInput.value;
+            const dataRetirada = dataRetiradaInput.value;
+            const dataDevolucao = dataDevolucaoInput.value;
+        
+            // Validação básica
+            if (!quantidade || quantidade < 1) {
+                alert('Por favor, insira uma quantidade válida.');
+                return;
+            }
+            if (!dataEvento || !dataRetirada || !dataDevolucao) {
+                alert('Por favor, selecione as datas corretamente.');
+                return;
+            }
+        
+            const reservaData = {
+                produtoId,
+                quantidade,
+                data_evento: dataEvento,
+                data_retirada: dataRetirada,
+                data_devolucao: dataDevolucao,
+            };
+        
+            try {
+                const response = await fetch('/confirmar-reserva', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(reservaData),
+                });
+        
+                const result = await response.json();
+                if (result.success) {
+                    alert('Reserva confirmada com sucesso!');
+                } else {
+                    alert(`Erro ao confirmar a reserva: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Erro ao enviar a reserva:', error);
+                alert('Erro ao tentar realizar a reserva.');
             }
         }
+        console.log('Produto ID recuperado do localStorage:', produtoId);
+console.log('Quantidade capturada:', quantidade);
+console.log('Data do Evento:', dataEvento);
+console.log('Data de Retirada:', dataRetirada);
+console.log('Data de Devolução:', dataDevolucao);
+
     </script>
 </body>
 </html>
