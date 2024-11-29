@@ -125,64 +125,69 @@
     <script>
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
-
+    
         function generateCalendar(year, month) {
             const calendarDiv = document.getElementById('calendar');
             const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
             calendarDiv.innerHTML = '';
             document.getElementById('month-display').innerText = `${monthNames[month]} ${year}`;
-
+    
             const date = new Date(year, month, 1);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-
+    
             let table = '<table><tr><th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th></tr><tr>';
             let emptyCells = date.getDay();
-
+    
             for (let i = 0; i < emptyCells; i++) {
                 table += '<td></td>';
             }
-
+    
             for (let day = 1; day <= daysInMonth; day++) {
                 if ((emptyCells + day - 1) % 7 === 0) {
                     table += '</tr><tr>';
                 }
                 table += `<td onclick="selectDate(${day}, ${month}, ${year})">${day}</td>`;
             }
-
+    
             table += '</tr></table>';
             calendarDiv.innerHTML = table;
         }
-
+    
         function selectDate(day, month, year) {
             document.getElementById('day-output').innerText = 'Dia: ' + day;
             document.getElementById('month-output').innerText = 'Mês: ' + (month + 1);
             document.getElementById('year-output').innerText = 'Ano: ' + year;
-
+    
             const partyDate = new Date(year, month, day);
             const pickupDate = new Date(partyDate);
             const returnDate = new Date(partyDate);
-
+    
             pickupDate.setDate(partyDate.getDate() - 1);
             returnDate.setDate(partyDate.getDate() + 1);
-
+    
             document.getElementById('pickup-date').innerText = 'Data de Retirada: ' + formatDate(pickupDate);
             document.getElementById('party-date').innerText = 'Data da Festa: ' + formatDate(partyDate);
             document.getElementById('return-date').innerText = 'Data de Devolução: ' + formatDate(returnDate);
-
+    
+            // Salvar as datas no localStorage
+            localStorage.setItem('data_evento', formatDate(partyDate));
+            localStorage.setItem('data_retirada', formatDate(pickupDate));
+            localStorage.setItem('data_devolucao', formatDate(returnDate));
+    
             // Ativar o botão de Termos e Condições após a seleção da data
             document.getElementById('terms-button').disabled = false;
         }
-
+    
         function formatDate(date) {
             const day = date.getDate().toString().padStart(2, '0');
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const year = date.getFullYear();
             return `${day}/${month}/${year}`;
         }
-
+    
         function changeMonth(direction) {
             currentMonth += direction;
-
+    
             if (currentMonth > 11) {
                 currentMonth = 0;
                 currentYear++;
@@ -191,16 +196,77 @@
                 currentMonth = 11;
                 currentYear--;
             }
-
+    
             generateCalendar(currentYear, currentMonth);
         }
-
+    
         // Redireciona para a página de Termos e Condições
         function goToTerms() {
             window.location.href = 'termos-conditions.html'; // Altere para o caminho da página de Termos e Condições
         }
 
+        // Função para obter o produtoId da URL
+function getProdutoId() {
+    const params = new URLSearchParams(window.location.search);
+const produtoId = params.get('produtoId');
+const quantidade = params.get('quantidade');
+
+}
+
+
+
+// Exibir o produtoId na página, se necessário
+console.log('Produto ID:', produtoId);
+
+
+function confirmarReserva() {
+    const produtoId = localStorage.getItem('produtoId');
+    const dataEvento = localStorage.getItem('data_evento');
+    const dataRetirada = localStorage.getItem('data_retirada');
+    const dataDevolucao = localStorage.getItem('data_devolucao');
+
+    if (produtoId && dataEvento && dataRetirada && dataDevolucao) {
+        // Enviar os dados para o servidor via uma requisição (exemplo com fetch)
+        fetch('/confirmar-reserva', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                produtoId,
+                data_evento: dataEvento,
+                data_retirada: dataRetirada,
+                data_devolucao: dataDevolucao
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Reserva confirmada com sucesso!');
+                // Redirecionar para uma página de confirmação, por exemplo
+                window.location.href = '/confirmacao';
+            } else {
+                alert('Erro ao confirmar a reserva: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao enviar a reserva:', error);
+        });
+    } else {
+        alert('Por favor, selecione todas as datas antes de confirmar.');
+    }
+}
+// Recupera os parâmetros da URL
+
+// Agora você pode usar produtoId e quantidade na página de calendário
+console.log('Produto ID:', produtoId);
+console.log('Quantidade:', quantidade);
+
+
+    
         generateCalendar(currentYear, currentMonth);
+   
+        
     </script>
 </body>
 </html>
