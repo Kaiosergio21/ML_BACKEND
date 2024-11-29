@@ -81,10 +81,31 @@
                 console.error('Erro ao remover item do carrinho:', error);
             }
         }
+
         async function redirecionarParaCalendario(produtoId) {
-            // Redireciona para a página do calendário, passando o produtoId como parâmetro na URL
-            window.location.href = `/calendario?produtoId=${produtoId}`;
+            const quantidadeInput = document.getElementById(`quantidade-${produtoId}`);
+            const quantidade = parseInt(quantidadeInput.value);
+        
+            // Validação da quantidade
+            if (isNaN(quantidade) || quantidade < 1) {
+                alert('A quantidade deve ser pelo menos 1 e um número válido.');
+                return;
+            }
+        
+            // Verificação do produtoId, que deve ser um número válido e maior que 0
+            if (produtoId < 1) {
+                alert('ID do produto inválido.');
+                return;
+            }
+        
+            // Armazena produtoId e quantidade no localStorage
+            localStorage.setItem('produtoId', produtoId);
+            localStorage.setItem('quantidade', quantidade);
+        
+            // Redireciona para a página de calendário, passando os parâmetros via URL
+            window.location.href = `calendar.html?produtoId=${produtoId}&quantidade=${quantidade}`;
         }
+        
         
 
         // Carrega os itens do carrinho ao abrir a página
@@ -94,7 +115,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #83851c;
             margin: 0;
             padding: 20px;
         }
@@ -102,18 +123,20 @@
         .container {
             max-width: 800px;
             margin: auto;
-            background: #fff;
+            background: #83851c;
+            
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.63);
         }
 
         .carrinho-list {
-            margin-top: 20px;
+            margin-top: 50px;
+            margin-bottom: 30px;
         }
 
         .carrinho-item {
-            border: 1px solid #ddd;
+            border: 1px solid #000000;
             border-radius: 5px;
             margin: 10px 0;
             padding: 10px;
@@ -127,16 +150,19 @@
         }
 
         button {
-            background: #28a745;
-            color: #fff;
+            background: #000000;
+            color: #83851c;
             border: none;
             padding: 10px;
             cursor: pointer;
         }
 
         button:hover {
-            background: #218838;
+            background: #83851c;
+            color: #000000;
         }
     </style>
+
+    
 </body>
 </html>
