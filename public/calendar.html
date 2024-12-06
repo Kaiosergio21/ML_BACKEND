@@ -1,121 +1,185 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrinho de Compras</title>
-    <link rel="stylesheet" href="carrinho.css">
+    <title>Calendário Interativo</title>
+    <link rel="stylesheet" href="calendar.css">
+  
 </head>
 <body>
+    <h1>Calendário Interativo</h1>
 
-    <button  onclick="window.location.href='produtos.html';" class="BtnBack"><i class="fa-solid fa-caret-left"></i> Voltar</button>
+    <div class="month-nav">
+        <button onclick="changeMonth(-1)">&#9664;</button>
+        <span id="month-display"></span>
+        <button onclick="changeMonth(1)">&#9654;</button>
+    </div>
 
+    <div id="calendar"></div>
 
-    <div class="container">
-        <h1>Carrinho de Compras</h1>
-        <div id="carrinho-list" class="carrinho-list"></div>
-        <button onclick="window.location.href='/produtos.html';">Voltar para Produtos</button>
+    <div class="date-output">
+        <div id="day-output">Dia: --</div>
+        <div id="month-output">Mês: --</div>
+        <div id="year-output">Ano: --</div>
+    </div>
+
+    <div class="rental-dates">
+        <div id="pickup-date">Data de Retirada: --</div>
+        <div id="party-date">Data da Festa: --</div>
+        <div id="return-date">Data de Devolução: --</div>
+    </div>
+
+    <div class="terms-button">
+        <!-- Botão desativado até que uma data seja selecionada -->
+        <button id="terms-button" onclick="goToTerms()" disabled>Ver Termos e Condições</button>
     </div>
 
     <script>
-        async function carregarCarrinho() {
-            try {
-                const response = await fetch('/carrinho');
-                const produtos = await response.json();
-
-                const carrinhoList = document.getElementById('carrinho-list');
-                carrinhoList.innerHTML = '';
-
-                produtos.forEach(produto => {
-                    carrinhoList.innerHTML += `
-                        <div class="carrinho-item" data-id="${produto.produto_id}">
-                            <h3>${produto.nome}</h3>
-                            <p>Quantidade: <input type="number" value="${produto.quantidade}" min="1" id="quantidade-${produto.produto_id}"></p>
-                            <button onclick="atualizarQuantidade(${produto.produto_id})">Atualizar</button>
-                            <button onclick="removerItem(${produto.produto_id})">Remover</button>
-                            <button onclick="redirecionarParaCalendario(${produto.produto_id})">Registrar Aluguel</button>
-                        </div>
-                    `;
-                });
-            } catch (error) {
-                console.error('Erro ao carregar o carrinho:', error);
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+    
+        function generateCalendar(year, month) {
+            const calendarDiv = document.getElementById('calendar');
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            calendarDiv.innerHTML = '';
+            document.getElementById('month-display').innerText = `${monthNames[month]} ${year}`;
+    
+            const date = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+            let table = '<table><tr><th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th></tr><tr>';
+            let emptyCells = date.getDay();
+    
+            for (let i = 0; i < emptyCells; i++) {
+                table += '<td></td>';
             }
+    
+            for (let day = 1; day <= daysInMonth; day++) {
+                if ((emptyCells + day - 1) % 7 === 0) {
+                    table += '</tr><tr>';
+                }
+                table += `<td onclick="selectDate(${day}, ${month}, ${year})">${day}</td>`;
+            }
+    
+            table += '</tr></table>';
+            calendarDiv.innerHTML = table;
+        }
+    
+        function selectDate(day, month, year) {
+            document.getElementById('day-output').innerText = 'Dia: ' + day;
+            document.getElementById('month-output').innerText = 'Mês: ' + (month + 1);
+            document.getElementById('year-output').innerText = 'Ano: ' + year;
+    
+            const partyDate = new Date(year, month, day);
+            const pickupDate = new Date(partyDate);
+            const returnDate = new Date(partyDate);
+    
+            pickupDate.setDate(partyDate.getDate() - 1);
+            returnDate.setDate(partyDate.getDate() + 1);
+    
+            document.getElementById('pickup-date').innerText = 'Data de Retirada: ' + formatDate(pickupDate);
+            document.getElementById('party-date').innerText = 'Data da Festa: ' + formatDate(partyDate);
+            document.getElementById('return-date').innerText = 'Data de Devolução: ' + formatDate(returnDate);
+    
+            // Salvar as datas no localStorage
+            localStorage.setItem('data_evento', formatDate(partyDate));
+            localStorage.setItem('data_retirada', formatDate(pickupDate));
+            localStorage.setItem('data_devolucao', formatDate(returnDate));
+    
+            // Ativar o botão de Termos e Condições após a seleção da data
+            document.getElementById('terms-button').disabled = false;
+        }
+    
+        function formatDate(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+    
+        function changeMonth(direction) {
+            currentMonth += direction;
+    
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+    
+            generateCalendar(currentYear, currentMonth);
+        }
+    
+        // Redireciona para a página de Termos e Condições
+        function goToTerms() {
+            window.location.href = 'termos-conditions.html'; // Altere para o caminho da página de Termos e Condições
         }
 
-        async function atualizarQuantidade(produtoId) {
-            const quantidadeInput = document.getElementById(`quantidade-${produtoId}`);
-            const quantidade = parseInt(quantidadeInput.value);
+        // Função para obter o produtoId da URL
+function getProdutoId() {
+    const params = new URLSearchParams(window.location.search);
+const produtoId = params.get('produtoId');
+const quantidade = params.get('quantidade');
 
-            if (quantidade < 1) {
-                alert('A quantidade deve ser pelo menos 1.');
-                return;
+}
+
+
+
+// Exibir o produtoId na página, se necessário
+console.log('Produto ID:', produtoId);
+
+
+function confirmarReserva() {
+    const produtoId = localStorage.getItem('produtoId');
+    const dataEvento = localStorage.getItem('data_evento');
+    const dataRetirada = localStorage.getItem('data_retirada');
+    const dataDevolucao = localStorage.getItem('data_devolucao');
+
+    if (produtoId && dataEvento && dataRetirada && dataDevolucao) {
+        // Enviar os dados para o servidor via uma requisição (exemplo com fetch)
+        fetch('/confirmar-reserva', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                produtoId,
+                data_evento: dataEvento,
+                data_retirada: dataRetirada,
+                data_devolucao: dataDevolucao
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Reserva confirmada com sucesso!');
+                // Redirecionar para uma página de confirmação, por exemplo
+                window.location.href = '/confirmacao';
+            } else {
+                alert('Erro ao confirmar a reserva: ' + data.message);
             }
+        })
+        .catch(error => {
+            console.error('Erro ao enviar a reserva:', error);
+        });
+    } else {
+        alert('Por favor, selecione todas as datas antes de confirmar.');
+    }
+}
+// Recupera os parâmetros da URL
 
-            try {
-                const response = await fetch('/atualizar-carrinho', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ produtoId, quantidade })
-                });
+// Agora você pode usar produtoId e quantidade na página de calendário
+console.log('Produto ID:', produtoId);
+console.log('Quantidade:', quantidade);
 
-                const result = await response.json();
-                alert(result.message); // Mensagem de sucesso ou erro
-                carregarCarrinho(); // Atualiza o carrinho para refletir as mudanças
-            } catch (error) {
-                console.error('Erro ao atualizar a quantidade:', error);
-            }
-        }
-
-        async function removerItem(produtoId) {
-            try {
-                const response = await fetch('/remover-carrinho', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ produtoId })
-                });
-
-                const result = await response.json();
-                alert(result.message); // Mensagem de sucesso ou erro
-                carregarCarrinho(); // Atualiza o carrinho para refletir as mudanças
-            } catch (error) {
-                console.error('Erro ao remover item do carrinho:', error);
-            }
-        }
-
-        async function redirecionarParaCalendario(produtoId) {
-            const quantidadeInput = document.getElementById(`quantidade-${produtoId}`);
-            const quantidade = parseInt(quantidadeInput.value);
-        
-            // Validação da quantidade
-            if (isNaN(quantidade) || quantidade < 1) {
-                alert('A quantidade deve ser pelo menos 1 e um número válido.');
-                return;
-            }
-        
-            // Verificação do produtoId, que deve ser um número válido e maior que 0
-            if (produtoId < 1) {
-                alert('ID do produto inválido.');
-                return;
-            }
-        
-            // Armazena produtoId e quantidade no localStorage
-            localStorage.setItem('produtoId', produtoId);
-            localStorage.setItem('quantidade', quantidade);
-        
-            // Redireciona para a página de calendário, passando os parâmetros via URL
-            window.location.href = `calendar.html?produtoId=${produtoId}&quantidade=${quantidade}`;
-        }
-        
-        
-
-        // Carrega os itens do carrinho ao abrir a página
-        carregarCarrinho();
-    </script>
 
     
+        generateCalendar(currentYear, currentMonth);
+   
+        
+    </script>
 </body>
 </html>
