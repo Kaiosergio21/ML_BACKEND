@@ -1,0 +1,125 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background:#333;
+    overflow: auto;
+    height: 100vh;
+    color: white;
+}
+
+h1 {
+    margin-bottom: 40px;
+}
+
+#calendar {
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.output {
+    margin-top: 10px;
+    font-size: 1.2rem;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+
+th {
+    background-color: #050303;
+    color:#daa520;
+}
+
+td:hover {
+    background-color: #000000;
+    color:#daa520;
+}
+
+.date-output {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.date-output div {
+    margin: 0 10px;
+    padding: 10px;
+    border: 1px solid black;
+    width: 100px;
+}
+
+.month-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+    
+}
+
+.month-nav button {
+    padding: 10px;
+    margin: 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background: #daa520;
+    border: none;
+    border-radius: 5px;
+}
+
+#month-display {
+    font-size: 20px;
+}
+
+.rental-dates {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.rental-dates div {
+    margin: 5px 0;
+}
+
+.terms-button {
+    margin-top: 20px;
+}
+
+.terms-button button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    background: #daa520; /* Cor inicial do fundo */
+    color: rgb(12, 5, 5); /* Cor inicial do texto */
+    /* Opcional: remover bordas */
+    border: none;
+    border-radius: 5px;
+}
+
+ button:hover {
+    background: #000000; /* Cor do fundo no hover */
+    color:#daa520; /* Cor do texto no hover */
+}
