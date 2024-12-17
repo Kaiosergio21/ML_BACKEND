@@ -1,0 +1,131 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+body {
+    height: 100vh;
+    background: #333;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+body::-webkit-scrollbar {
+    width: 10px;
+}
+body::-webkit-scrollbar-thumb {
+    background: white;
+    border-radius: 10px;
+}
+button.BtnBack {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 20px;
+    background: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+}
+button.BtnBack:hover {
+    background: white;
+    color: black;
+    box-shadow: 0 0 10px white;
+}
+button.BtnBack i {
+    transition: .4s;
+}
+button.BtnBack:hover i {
+    animation: ArrowBack .7s linear infinite;
+}
+@keyframes ArrowBack {
+    0% {
+        transform: translateX(5px);
+    }
+    100% {
+        transform: translateX(-50px);
+    }
+}
+form {
+    padding: 20px;
+    background: #daa520;
+    box-shadow: 0 0 10px black;
+    border-radius: 10px;
+    height: auto;
+    width: 30vw;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+form h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 30px;
+}
+form label {
+    font-size: 20px;
+}
+form .Card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: bold;
+}
+form .Card input[type="text"],
+form .Card input[type="email"],
+form .Card input[type="password"],
+form .CardDois input {
+    width: 60%;
+    padding: 10px;
+    border: none;
+    background: none;
+    border-bottom: solid black 1px;
+    outline: none;
+    font-weight: bold;
+    font-size: 17px;
+}
+form .Card input:focus {
+    border: none;
+    box-shadow: 0 0 10px black;
+    border-radius: 5px;
+}
+form .CardDois {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: bold;
+}
+form .CardDois .ControlsCardDois {
+    width: 100%;
+    margin: 30px 0;
+}
+form .CardDois .ControlsCardDois button,
+form .ControlsForm button {
+    padding: 10px;
+    border: none;
+    background: black;
+    color: white;
+    border-radius: 5px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+form .CardDois .ControlsCardDois button:hover,
+form .ControlsForm button:hover {
+    background: grey;
+    box-shadow: 0 0 10px black;
+}
+form .ControlsForm {
+    margin-top: 30px;
+}
+form .Card input[type="radio"] {
+    margin-right: 60%;
+}
