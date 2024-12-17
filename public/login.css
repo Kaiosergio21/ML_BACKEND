@@ -1,0 +1,130 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+body {
+    height: 100vh;
+    background: #333;
+    display: grid;
+    place-items: center;
+}
+button.BtnBack {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 20px;
+    background: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+}
+button.BtnBack:hover {
+    background: white;
+    color: black;
+    box-shadow: 0 0 10px white;
+}
+button.BtnBack i {
+    transition: .4s;
+}
+button.BtnBack:hover i {
+    animation: ArrowBack .7s linear infinite;
+}
+@keyframes ArrowBack {
+    0% {
+        transform: translateX(5px);
+    }
+    100% {
+        transform: translateX(-50px);
+    }
+}
+form {
+    padding: 20px;
+    background: #daa520;
+    box-shadow: 0 0 10px black;
+    border-radius: 10px;
+    height: auto;
+    width: 40vw;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+form h4 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 30px;
+}
+form label {
+    font-size: 20px;
+}
+form .Card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: bold;
+}
+form .Card input {
+    width: 80%;
+    padding: 10px;
+    border: none;
+    background: none;
+    border-bottom: solid black 1px;
+    outline: none;
+    font-weight: bold;
+    font-size: 17px;
+}
+form .Card input:focus {
+    border: none;
+    box-shadow: 0 0 10px black;
+    border-radius: 5px;
+}
+form .Controls {
+    width: 100%;
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+}
+form .Controls button {
+    padding: 10px;
+    border: none;
+    background: black;
+    color: white;
+    border-radius: 5px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 10rem;
+}
+
+form .Controls a {
+    padding: 8px;
+    border: none;
+   
+    color: white;
+    border-radius: 5px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+form .Controls button:hover {
+  
+    box-shadow: 0 0 10px black;
+}
+
+
+form .Controls a:hover {
+   
+    cursor: pointer;
+}
+
+form .SubControls button a {
+    text-decoration: none;
+    color: white;
+}
