@@ -36,6 +36,12 @@
     </div>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateCalendar(currentYear, currentMonth);
+        });
+           
+
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth();
     
@@ -128,8 +134,7 @@ const quantidade = params.get('quantidade');
 
 
 
-// Exibir o produtoId na página, se necessário
-console.log('Produto ID:', produtoId);
+
 
 
 function confirmarReserva() {
@@ -176,9 +181,6 @@ console.log('Produto ID:', produtoId);
 console.log('Quantidade:', quantidade);
 
 
-    
-        generateCalendar(currentYear, currentMonth);
-   
         
     </script>
 </body>
