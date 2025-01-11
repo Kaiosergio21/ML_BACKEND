@@ -49,3 +49,11 @@ CREATE TABLE reservas (
   FOREIGN KEY (user_id) REFERENCES users(id), -- Chave estrangeira para o ID do usuário (supondo que exista uma tabela 'users' com a coluna 'id')
   FOREIGN KEY (produto_id) REFERENCES produtos(id) -- Chave estrangeira para o ID do produto (supondo que exista uma tabela 'produtos' com a coluna 'id')
 );
+
+CREATE TABLE produtos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    descricao TEXT,
+    preco DECIMAL(10, 2) NOT NULL,
+    imagem VARCHAR(255) NOT NULL  -- Campo para armazenar a URL ou caminho da imagem
+);

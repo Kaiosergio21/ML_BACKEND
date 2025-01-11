@@ -6,7 +6,8 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const axios = require('axios'); // Para requisições HTTP
 const app = express();
-const QRCode = require('qrcode')
+const connection = require('./config/dbConfig'); // Importa a configuração do banco de dados
+const sessionConfig = require('./config/sessionConfig'); // Importa a configuração de sessão
 const port = 3000;
 require('dotenv').config();
 
@@ -14,28 +15,8 @@ require('dotenv').config();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Configuração da sessão
-app.use(session({
-  secret: 'your-secret-key', // Altere para uma chave secreta forte
-  resave: false,
-  saveUninitialized: false
-}));
-
-// Configuração do banco de dados
-const connection = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
-});
-
-connection.connect((err) => {
-  if (err) {
-    console.log('Erro ao conectar com o banco de dados: ' + err.stack);
-    return;
-  }
-  console.log('Conectado com sucesso! ID: ' + connection.threadId);
-});
+// Configuração de sessão
+app.use(sessionConfig);
 
 // Servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
