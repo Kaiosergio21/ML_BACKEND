@@ -8,6 +8,8 @@ const axios = require('axios'); // Para requisições HTTP
 const app = express();
 const connection = require('./config/dbConfig'); // Importa a configuração do banco de dados
 const sessionConfig = require('./config/sessionConfig'); // Importa a configuração de sessão
+const userRoutes = require('./routes/userRoutes'); // Importando o arquivo de rotas
+
 const port = 3000;
 require('dotenv').config();
 
@@ -26,58 +28,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/produtos.html'));
 });
 
+app.use('/user', userRoutes);  // Rota base para as operações do usuário
 
 
-// Rota para inscrição
 
-app.post('/subscription', (req, res) => {
-  const { nome, sobrenome, email, telefone, cpf_cnpj, tipo_cliente, password, cep, rua, bairro, cidade, estado, numero } = req.body;
-
-  // Verificar se 'tipo_cliente' foi enviado corretamente
-  if (!tipo_cliente) {
-    return res.status(400).send('Tipo de cliente não selecionado.');
-  }
-// Função para validar CPF ou CNPJ
-function validateCpfCnpj(cpf_cnpj, tipo_cliente) {
-  if (tipo_cliente === 'pf') {
-    return validateCPF(cpf_cnpj); // Valida CPF
-  } else if (tipo_cliente === 'pj') {
-    return validarCNPJ(cpf_cnpj); // Valida CNPJ
-  }
-  return false; // Tipo de cliente inválido
-}
-
-// Chamando a função de validação no código principal
-if (!validateCpfCnpj(cpf_cnpj, tipo_cliente)) {
-  return res.status(400).send(tipo_cliente === 'pf' ? 'CPF inválido.' : 'CNPJ inválido.');
-}
-
-  if (!isCepSalvador(cep)) {
-    return res.status(400).send('O CEP informado não pertence ao estado permitido.');
-  }
-
-  bcrypt.hash(password, 10, (err, hash) => {
-    if (err) return res.status(500).send('Erro ao criptografar a senha.');
-
-    const query = `
-      INSERT INTO users (nome, sobrenome, email, telefone, cpf_cnpj, tipo_cliente, password, cep, rua, bairro, cidade, estado, numero)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    connection.query(query, [nome, sobrenome, email, telefone, cpf_cnpj, tipo_cliente, hash, cep, rua, bairro, cidade, estado, numero], (error, results) => {
-      if (error) {
-        console.error('Erro ao registrar o usuário: ', error);  // Mostrar detalhes do erro
-        return res.status(500).send(`Erro ao registrar o usuário: ${error.message}`);
-      }else{
-      console.log('Usuário registrado com sucesso:', results);  // Exibir resultados da inserção
-      res.sendFile(path.join(__dirname, 'public', 'login.html'));
-      }
-    });
-  });
-});
-
-
-// Rota para login de usuário
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
@@ -110,131 +64,6 @@ app.post('/login', (req, res) => {
     });
   });
 });
-
-
-// Rota para logout de usuário
-app.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).send('Erro ao encerrar a sessão.');
-    }
-    res.redirect('/login'); // Redireciona para a página de login após logout
-  });
-});
-
-// Função para validar se o CEP pertence a Salvador
-function isCepSalvador(cep) {
-  const cepNumber = parseInt(cep);
-  return cepNumber >= 40000000 && cepNumber <= 42599999;
-}
-
-
-
-
-// Função para validar CNPJ
-function validarCNPJ(cnpj) {
-  cnpj = cnpj.replace(/[^\d]+/g, ''); // Remove caracteres não numéricos
-
-  if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) {
-    return false; // CNPJ inválido ou com números repetidos
-  }
-
-  let soma = 0;
-  let resto;
-
-  // Validação do primeiro dígito
-  let pesos = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-  for (let i = 0; i < 12; i++) {
-    soma += parseInt(cnpj.charAt(i)) * pesos[i];
-  }
-  resto = soma % 11;
-  resto = resto < 2 ? 0 : 11 - resto;
-
-  if (parseInt(cnpj.charAt(12)) !== resto) {
-    return false;
-  }
-
-  soma = 0;
-  pesos = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-  for (let i = 0; i < 13; i++) {
-    soma += parseInt(cnpj.charAt(i)) * pesos[i];
-  }
-  resto = soma % 11;
-  resto = resto < 2 ? 0 : 11 - resto;
-
-  if (parseInt(cnpj.charAt(13)) !== resto) {
-    return false;
-  }
-
-  return true;
-}
-
-
-
-
-// Rota para registrar os usuários com a validação do CEP
-
-
-// Rota para trocar a senha
-const validateCPF = (cpf) => {
-  // Implemente a validação do CPF aqui (exemplo básico)
-  cpf = cpf.replace(/[^\d]+/g, ''); // Remove caracteres não numéricos
-  if (cpf.length !== 11) return false;
-
-  // Verificação simplificada
-  const repeated = cpf.split('').every((char) => char === cpf[0]);
-  if (repeated) return false;
-
-  // Adicione a lógica completa de validação do CPF aqui, se necessário.
-  return true;
-};
-
-
-app.post('/change-password', (req, res) => {
-  const { email, identificacao, newPassword } = req.body; // `identificacao` pode ser CPF ou CNPJ
-
-  if (!email || !identificacao || !newPassword) {
-    return res.status(400).send('Todos os campos são obrigatórios.');
-  }
-
-  // Validação de CPF ou CNPJ
-  const isCPF = identificacao.length === 11 && validateCPF(identificacao);
-  const isCNPJ = identificacao.length === 14 && validarCNPJ(identificacao);
-
-  if (!isCPF && !isCNPJ) {
-    return res.status(400).send('CPF ou CNPJ inválido.');
-  }
-
-  const query = 'SELECT id FROM users WHERE email = ? AND cpf_cnpj = ?';
-  connection.query(query, [email, identificacao], (error, results) => {
-    if (error) {
-      console.error('Erro ao buscar o usuário: ', error);
-      return res.status(500).send('Erro interno no servidor.');
-    }
-
-    if (results.length === 0) {
-      return res.status(404).send('Usuário não encontrado.');
-    }
-
-    bcrypt.hash(newPassword, 10, (err, hash) => {
-      if (err) {
-        console.error('Erro ao criptografar a nova senha: ', err);
-        return res.status(500).send('Erro interno no servidor.');
-      }
-
-      const updateQuery = 'UPDATE users SET password = ? WHERE id = ?';
-      connection.query(updateQuery, [hash, results[0].id], (error) => {
-        if (error) {
-          console.error('Erro ao atualizar a senha: ', error);
-          return res.status(500).send('Erro interno no servidor.');
-        }
-
-        res.send('Senha atualizada com sucesso.');
-      });
-    });
-  });
-});
-
 
 // Route to get items from cart
 app.get('/carrinho', (req, res) => {
@@ -331,6 +160,7 @@ app.post('/adicionar-carrinho', (req, res) => {
     res.json({ message: 'Item adicionado ao carrinho com sucesso!' });
   });
 });
+
 
 // Serve calendar page
 app.get('/calendario', (req, res) => {

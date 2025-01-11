@@ -7,4 +7,4 @@ const sessionConfig = session({
   saveUninitialized: false,
 });
 
-module.exports = sessionConfig;
+module.exports = sessionConfig
